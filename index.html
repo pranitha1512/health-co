@@ -1,0 +1,382 @@
+html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Powered Disease Predictor - KG Reddy College</title> {/* Title Updated */}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Apply Inter font globally */
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Use the uploaded image as background - Kept original */
+            background-image: url('uploaded:doctor-in-medical-lab-coat-with-a-stethoscope-doctor-in-hospital-background-with-copy-space-low-poly-wireframe-vector.jpg-ea328f41-8131-4879-82f3-1e498a898674');
+            background-size: cover; /* Cover the entire page */
+            background-position: center center; /* Center the image */
+            background-attachment: fixed; /* Keep background fixed during scroll */
+            background-color: #0a192f; /* Fallback color if image fails */
+        }
+        /* Loading Overlay Styles */
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* Use a semi-transparent dark blue or an image */
+            /* background-color: rgba(10, 25, 47, 0.95); */
+             background: #0a192f url('https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') center center/cover no-repeat; /* Example image - replace if needed */
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            transition: opacity 0.5s ease-out; /* Fade out transition */
+        }
+        #loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none; /* Allow clicks through when hidden */
+        }
+        .loader-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+        .loader-message {
+            font-size: 1rem;
+            font-weight: 400;
+        }
+         /* Optional: Add a simple spinner */
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #fff;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-top: 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Custom scrollbar for better aesthetics (optional) */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(200, 200, 200, 0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: rgba(136, 136, 136, 0.5); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(85, 85, 85, 0.7); }
+
+        /* Style for clickable links in report */
+        .report-link { color: #2563eb; text-decoration: underline; cursor: pointer; }
+        .report-link:hover { color: #1d4ed8; }
+
+        /* Ensure label frames have consistent padding and improved styling */
+        .label-frame {
+            border: 1px solid rgba(204, 204, 204, 0.3); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;
+            background-color: rgba(255, 255, 255, 0.85); backdrop-filter: blur(8px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .label-frame-title { font-weight: 600; margin-bottom: 0.75rem; font-size: 1.1rem; color: #01579b; }
+
+        /* Style buttons */
+        .action-button {
+            padding: 0.6rem 1.5rem; border-radius: 6px; font-weight: 500; cursor: pointer;
+            transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .action-button:hover { box-shadow: 0 4px 8px rgba(0,0,0,0.15); transform: translateY(-1px); }
+        .diagnose-button { background-color: #0288d1; color: white; }
+        .diagnose-button:hover { background-color: #0277bd; }
+        .clear-button { background-color: #eceff1; color: #37474f; border: 1px solid #cfd8dc; }
+        .clear-button:hover { background-color: #cfd8dc; }
+        .save-button { background-color: #00796b; color: white; }
+        .save-button:hover { background-color: #00695c; }
+        .search-button { background-color: #cfd8dc; color: #37474f; border: 1px solid #b0bec5; }
+        .search-button:hover { background-color: #b0bec5; }
+
+        /* Responsive symptom layout */
+        .symptom-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.5rem; }
+
+        /* Style for the college subheading */
+        .college-subheading { font-size: 0.95rem; font-style: italic; color: rgba(255, 255, 255, 0.8); margin-top: 0.25rem; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div id="loading-overlay">
+        <div class="loader-title">AI Powered Multi Language Disease Predictor</div>
+        <div class="loader-message">Initializing... Please wait.</div>
+        <div class="spinner"></div> {/* Optional spinner */}
+    </div>
+
+    <header class="bg-[#01579b]/90 backdrop-blur-sm text-white p-4 md:p-6 rounded-lg shadow-lg mb-6 text-center border border-blue-800">
+        {/* Title Updated */}
+        <h1 id="app-title" class="text-2xl md:text-3xl font-bold">AI Powered Multi Language Disease Predictor</h1>
+        <p id="college-heading" class="college-subheading">KG Reddy College of Engineering CSM-A</p>
+    </header>
+
+    <div class="container mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <div class="p-4 md:p-6 rounded-lg">
+            <h2 id="patient-info-title" class="text-xl font-semibold text-white mb-4 bg-[#01579b]/80 backdrop-blur-sm px-4 py-2 rounded-t-lg shadow">Patient Information & Diagnosis</h2>
+
+            <div class="label-frame rounded-b-lg">
+                <p id="search-patient-title" class="label-frame-title">Search Patient</p>
+                <div class="flex items-center gap-3 flex-wrap">
+                    <label id="patient-id-label" for="patient-id-entry" class="font-medium text-sm">Patient ID:</label>
+                    <input type="number" id="patient-id-entry" class="border border-gray-300 rounded px-2 py-1 w-20 text-sm focus:outline-none focus:ring-2 focus:ring-[#0288d1]">
+                    <button id="search-btn" class="action-button search-button text-sm">Search</button>
+                    <span id="search-status" class="text-sm text-gray-600 ml-2"></span>
+                </div>
+            </div>
+
+            <div class="label-frame">
+                 <p id="patient-details-title" class="label-frame-title">Patient Details</p>
+                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                     <div>
+                         <label id="patient-name-label" for="patient-name-entry" class="block text-sm font-medium text-gray-700 mb-1">Patient Name:</label>
+                         <input type="text" id="patient-name-entry" class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0288d1]">
+                     </div>
+                     <div>
+                         <label id="age-label" for="patient-age-entry" class="block text-sm font-medium text-gray-700 mb-1">Age:</label>
+                         <input type="number" id="patient-age-entry" class="w-24 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0288d1]">
+                     </div>
+                     <div>
+                         <label id="sex-label" for="patient-sex-combo" class="block text-sm font-medium text-gray-700 mb-1">Sex:</label>
+                         <select id="patient-sex-combo" class="w-32 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0288d1]">
+                             <option value="">Select</option>
+                             <option value="Male">Male</option>
+                             <option value="Female">Female</option>
+                             <option value="Other">Other</option>
+                         </select>
+                     </div>
+                     <div>
+                         <label id="phone-label" for="patient-phone-entry" class="block text-sm font-medium text-gray-700 mb-1">Phone:</label>
+                         <input type="tel" id="patient-phone-entry" class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0288d1]">
+                     </div>
+                </div>
+            </div>
+
+            <div class="label-frame">
+                <p id="symptoms-title" class="label-frame-title">Symptoms Checklist</p>
+                <div id="symptoms-grid" class="symptom-grid max-h-60 overflow-y-auto pr-2">
+                    </div>
+            </div>
+
+            <div class="flex justify-center gap-4 mt-4">
+                <button id="diagnose-btn" class="action-button diagnose-button">Diagnose</button>
+                <button id="clear-btn" class="action-button clear-button">Clear Form</button>
+            </div>
+
+        </div>
+
+        <div class="p-4 md:p-6 rounded-lg">
+            <h2 id="diagnosis-report-title" class="text-xl font-semibold text-white mb-4 bg-[#01579b]/80 backdrop-blur-sm px-4 py-2 rounded-t-lg shadow">Diagnosis Report</h2>
+
+            <div class="bg-[#bbdefb]/80 backdrop-blur-sm p-4 rounded-lg mb-4 border border-blue-200 shadow">
+                 <p id="predicted-condition-label" class="text-lg font-bold mb-1 text-blue-900">Predicted Condition:</p>
+                 <p id="predicted-condition" class="text-base font-medium text-blue-800">-</p>
+            </div>
+             <div class="bg-[#bbdefb]/80 backdrop-blur-sm p-4 rounded-lg mb-4 border border-blue-200 shadow">
+                 <p id="severity-label" class="text-base font-semibold mb-1 text-gray-800">Severity:</p>
+                 <p id="severity" class="text-base text-gray-700">-</p>
+             </div>
+
+            <div class="label-frame bg-[#e3f2fd]/80 border-blue-200">
+                 <p id="remedies-title" class="label-frame-title text-blue-900">Recommended Remedies</p>
+                 <div id="remedies-text" class="text-sm text-gray-800 space-y-1 max-h-40 overflow-y-auto pr-2">
+                      <p>-</p>
+                 </div>
+            </div>
+
+            <div class="label-frame bg-[#e3f2fd]/80 border-blue-200">
+                 <p id="medicines-title" class="label-frame-title text-blue-900">Recommended Medicines & Resources</p>
+                 <div id="medicines-text" class="text-sm text-gray-800 space-y-1 max-h-40 overflow-y-auto pr-2">
+                      <p>-</p>
+                 </div>
+            </div>
+
+             <div class="flex justify-center mt-4">
+                  {/* Button Text Updated */}
+                  <button id="save-btn" class="action-button save-button">Save Diagnosis Report</button>
+             </div>
+             {/* Removed the "Not Functional" paragraph */}
+
+        </div>
+    </div>
+
+    <footer class="text-center mt-6 p-4">
+        <span id="language-label" class="mr-3 font-medium text-white/90">Language:</span>
+        <label for="lang-en" class="mr-4 text-sm text-white/90"><input type="radio" id="lang-en" name="language" value="english" checked class="mr-1 accent-[#0288d1]">English</label>
+        <label for="lang-hi" class="mr-4 text-sm text-white/90"><input type="radio" id="lang-hi" name="language" value="hindi" class="mr-1 accent-[#0288d1]">हिंदी</label>
+        <label for="lang-te" class="text-sm text-white/90"><input type="radio" id="lang-te" name="language" value="telugu" class="mr-1 accent-[#0288d1]">తెలుగు</label>
+    </footer>
+
+    <script>
+        // --- DATA (Symptoms, Diseases, Translations, Treatments) ---
+        // Data remains the same as the previous version...
+         const symptomTranslations = {
+             "Fever": {"english": "Fever", "hindi": "बुखार", "telugu": "జ్వరం"},"Cough": {"english": "Cough", "hindi": "खांसी", "telugu": "దగ్గు"},"Headache": {"english": "Headache", "hindi": "सिरदर्द", "telugu": "తలనొప్పి"},"Fatigue": {"english": "Fatigue", "hindi": "थकान", "telugu": "అలసట"},"Sneezing": {"english": "Sneezing", "hindi": "छींक आना", "telugu": "తుమ్ము"},"Body Ache": {"english": "Body Ache", "hindi": "शरीर में दर्द", "telugu": "శరీరం నొప్పి"},"Chills": {"english": "Chills", "hindi": "ठंड लगना", "telugu": "చలి"},"Sore Throat": {"english": "Sore Throat", "hindi": "गले में खराश", "telugu": "గొంతు నొప్పి"},"High BP": {"english": "High BP", "hindi": "उच्च रक्तचाप", "telugu": "అధిక రక్తపోటు"},"High Sugar": {"english": "High Sugar", "hindi": "उच्च शर्करा", "telugu": "అధిక షుగర్"},"Runny Nose": {"english": "Runny Nose", "hindi": "नाक बहना", "telugu": "నాసికా స్రావం"},"Rash": {"english": "Rash", "hindi": "दाने", "telugu": "టొణపం"},"Vomiting": {"english": "Vomiting", "hindi": "उल्टी", "telugu": "వాంతి"},"Diarrhea": {"english": "Diarrhea", "hindi": "दस्त", "telugu": "అతిసారం"},"Abdominal Pain": {"english": "Abdominal Pain", "hindi": "पेट दर्द", "telugu": "ఉదరం నొప్పి"},"Loss of Appetite": {"english": "Loss of Appetite", "hindi": "भूख न लगना", "telugu": "ఆకలి లేకపోవడం"},"Dizziness": {"english": "Dizziness", "hindi": "चक्कर आना", "telugu": "తలతిరుగుడు"},"Shortness of Breath": {"english": "Shortness of Breath", "hindi": "सांस लेने में तकलीफ", "telugu": "ఊపిరి ఆడకపోవడం"},"Chest Pain": {"english": "Chest Pain", "hindi": "सीने में दर्द", "telugu": "ఛాతీ నొప్పి"},"Nausea": {"english": "Nausea", "hindi": "मतली", "telugu": "వికారం"},"Swelling": {"english": "Swelling", "hindi": "सूजन", "telugu": "ఊతం"},"Red Eyes": {"english": "Red Eyes", "hindi": "लाल आँखें", "telugu": "ఎర్రగా కన్నులు"},"Ear Pain": {"english": "Ear Pain", "hindi": "कान दर्द", "telugu": "చెవి నొప్పి"},"Dehydration": {"english": "Dehydration", "hindi": "निर्जलीकरण", "telugu": "నిర్జలీకరణ"}
+         };
+         const symptoms = Object.keys(symptomTranslations);
+         const symptomDiseaseMap = {
+             'Fever': [1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],'Cough': [1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],'Headache': [1, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0],'Fatigue': [1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],'Sneezing': [0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],'Body Ache': [1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],'Chills': [0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],'Sore Throat': [1, 1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],'High BP': [0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],'High Sugar': [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],'Runny Nose': [0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],'Rash': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],'Vomiting': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0],'Diarrhea': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],'Abdominal Pain': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],'Loss of Appetite': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],'Dizziness': [0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],'Shortness of Breath': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0],'Chest Pain': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],'Nausea': [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],'Swelling': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],'Red Eyes': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],'Ear Pain': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],'Dehydration': [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
+         };
+         const diseases = [
+             'Flu', 'Common Cold', 'Migraine', 'Hypertension', 'Allergy', 'Dengue', 'Viral Fever', 'Strep Throat', 'High BP Crisis', 'Diabetes', 'Sinusitis', 'Chickenpox', 'Gastroenteritis', 'Food Poisoning', 'Appendicitis', 'Typhoid', 'Vertigo', 'Asthma', 'Heart Condition', 'Motion Sickness', 'Inflammation', 'Conjunctivitis', 'Ear Infection', 'Dehydration'
+         ];
+         const translations = { // --- App Title Updated in translations ---
+              "title": { "english": "AI Powered Multi Language Disease Predictor", "hindi": "एआई संचालित बहुभाषी रोग भविष्यवक्ता", "telugu": "AI పవర్డ్ బహుభాషా వ్యాధి ప్రిడిక్టర్" },"patient_info_title": { "english": "Patient Information & Diagnosis", "hindi": "रोगी की जानकारी और निदान", "telugu": "రోగి సమాచారం & రోగ నిర్ధారణ" },"diagnosis_report_title": { "english": "Diagnosis Report", "hindi": "निदान रिपोर्ट", "telugu": "రోగ నిర్ధారణ నివేదిక" },"symptoms_title": { "english": "Symptoms Checklist", "hindi": "लक्षण चेकलिस्ट", "telugu": "లక్షణాలు చెక్‌లిస్ట్" },"diagnose": { "english": "Diagnose", "hindi": "निदान करें", "telugu": "రోగ నిర్ధారణ" }, // --- Save Records Text Updated ---
+              "save_records": { "english": "Save Diagnosis Report", "hindi": "निदान रिपोर्ट सहेजें", "telugu": "రోగ నిర్ధారణ నివేదికను సేవ్ చేయండి" },"predicted_condition_label": { "english": "Predicted Condition:", "hindi": "संभावित स्थिति:", "telugu": "అంచనా వ్యాధి:" },"severity_label": { "english": "Severity:", "hindi": "गंभीरता:", "telugu": "తీవ్రత:" },"remedies_title": { "english": "Recommended Remedies", "hindi": "सुझाए गए उपचार", "telugu": "సిఫార్సు చేసిన పరిష్కారాలు" },"medicines_title": { "english": "Recommended Medicines & Resources", "hindi": "सुझाई गई दवाएं और संसाधन", "telugu": "సిఫార్సు చేసిన మందులు & వనరులు" },"patient_name_label": { "english": "Patient Name:", "hindi": "रोगी का नाम:", "telugu": "రోగి పేరు:" },"age_label": { "english": "Age:", "hindi": "आयु:", "telugu": "వయస్సు:" },"sex_label": { "english": "Sex:", "hindi": "लिंग:", "telugu": "లింగం:" },"phone_label": { "english": "Phone:", "hindi": "फ़ोन:", "telugu": "ఫోన్:" },"language_label": { "english": "Language:", "hindi": "भाषा:", "telugu": "భాష:" },"clear_button": { "english": "Clear Form", "hindi": "फ़ॉर्म साफ़ करें", "telugu": "ఫారమ్ క్లియర్ చేయండి" },"search_patient_title": { "english": "Search Patient", "hindi": "रोगी खोजें", "telugu": "రోగిని శోధించండి" },"patient_details_title": { "english": "Patient Details", "hindi": "रोगी का विवरण", "telugu": "రోగి వివరాలు" },"patient_id_label": { "english": "Patient ID:", "hindi": "रोगी आईडी:", "telugu": "రోగి ఐడి:" },"search_button": { "english": "Search", "hindi": "खोजें", "telugu": "శోధించండి" },"patient_not_found": { "english": "Patient ID not found.", "hindi": "रोगी आईडी नहीं मिला।", "telugu": "రోగి ఐడి కనుగొనబడలేదు." },"patient_loaded": { "english": "Patient details loaded.", "hindi": "रोगी का विवरण लोड किया गया।", "telugu": "రోగి వివరాలు లోడ్ చేయబడ్డాయి." },"enter_patient_id": { "english": "Please enter a numeric Patient ID.", "hindi": "कृपया एक संख्यात्मक रोगी आईडी दर्ज करें।", "telugu": "దయచేసి సంఖ్యా రోగి ఐడిని నమోదు చేయండి." },"input_error": { "english": "Input Error", "hindi": "इनपुट त्रुटि", "telugu": "ఇన్‌పుట్ లోపం" },"enter_patient_name": { "english": "Please enter patient name or load existing patient.", "hindi": "कृपया रोगी का नाम दर्ज करें या मौजूदा रोगी को लोड करें।", "telugu": "దయచేసి రోగి పేరును నమోదు చేయండి లేదా ఇప్పటికే ఉన్న రోగిని లోడ్ చేయండి." },"select_symptom": { "english": "Please select at least one symptom.", "hindi": "कृपया कम से कम एक लक्षण चुनें।", "telugu": "దయచేసి కనీసం ఒక లక్షణాన్ని ఎంచుకోండి." },"no_diagnosis_to_save": { "english": "No diagnosis to save. Please run Diagnose first.", "hindi": "सहेजने के लिए कोई निदान नहीं। कृपया पहले निदान चलाएँ।", "telugu": "సేవ్ చేయడానికి రోగ నిర్ధారణ లేదు. దయచేసి ముందుగా డయాగ్నోస్ రన్ చేయండి." }, // --- Save Confirmation Messages ---
+              "save_success_title": { "english": "Diagnosis Saved", "hindi": "निदान सहेजा गया", "telugu": "రోగ నిర్ధారణ సేవ్ చేయబడింది" },
+              "save_success_message": { "english": "Diagnosis report saved successfully (simulated).", "hindi": "निदान रिपोर्ट सफलतापूर्वक सहेजी गई (सिम्युलेटेड)।", "telugu": "రోగ నిర్ధారణ నివేదిక విజయవంతంగా సేవ్ చేయబడింది (అనుకరణ)." }
+         };
+         const treatmentDb = { // Treatment DB remains the same...
+              "Flu": {"remedies": {"english": ["Complete bed rest for 3-5 days", "Stay hydrated", "Warm compresses", "Steamy showers", "Humidifier", "Salt water gargle"],"hindi": ["3-5 दिन बिस्तर आराम", "हाइड्रेटेड रहें", "गर्म सेक", "भाप स्नान", "ह्यूमिडिफायर", "नमक पानी गरारे"],"telugu": ["3-5 రోజులు విశ్రాంతి", "హైడ్రేటెడ్‌గా ఉండండి", "వెచ్చని కంప్రెస్", "ఆవిరి స్నానాలు", "హ్యూమిడిఫైయర్", "ఉప్పు నీటి గార్గిల్"]},"medicines": {"english": ["Oseltamivir (prescription)", "Ibuprofen", "Dextromethorphan", "Phenylephrine", "Chlorpheniramine", "https://youtu.be/0AHC4X-ujwA", "https://www.cdc.gov/flu/treatment/index.html"],"hindi": ["ओसेल्टामिविर (प्रिस्क्रिप्शन)", "इबुप्रोफेन", "डेक्सट्रोमेथॉर्फन", "फेनिलेफ्राइन", "क्लोरफेनिरामाइन", "https://youtu.be/2hZSVj92eTI", "https://www.nhp.gov.in/flu-season_mtl"],"telugu": ["ఓసెల్టామివిర్ (ప్రిస్క్రిప్షన్)", "ఇబుప్రోఫెన్", "డెక్స్ట్రోమెథోర్ఫాన్", "ఫెనైలెఫ్రిన్", "క్లోర్ఫెనిరామిన్", "https://youtu.be/abc123", "https://telugu.oneindia.com/health/flu-treatment-12345"]}, "severity": { "english": "Moderate to Severe", "hindi": "मध्यम से गंभीर", "telugu": "మధ్యస్థం నుండి తీవ్రమైన" }},"Common Cold": {"remedies": {"english": ["Warm fluids", "Rest", "Saline drops", "Salt water gargle", "Humidifier", "Petroleum jelly for nose"],"hindi": ["गर्म तरल पदार्थ", "आराम", "सलाइन ड्रॉप्स", "नमक पानी गरारे", "ह्यूमिडिफायर", "नाक के लिए पेट्रोलियम जेली"],"telugu": ["వెచ్చని ద్రవాలు", "విశ్రాంతి", "సెలైన్ డ్రాప్స్", "ఉప్పు నీటి గార్గిల్", "హ్యూమిడిఫైయర్", "ముక్కు కోసం పెట్రోలియం జెల్లీ"]},"medicines": {"english": ["Paracetamol", "Chlorpheniramine", "Phenylephrine", "Dextromethorphan", "Zinc supplements", "https://youtu.be/qjisqhL-XQo", "https://www.mayoclinic.org/diseases-conditions/common-cold/symptoms-causes/syc-20351605"],"hindi": ["पैरासिटामोल", "क्लोरफेनिरामाइन", "फेनिलेफ्राइन", "डेक्सट्रोमेथॉर्फन", "जिंक सप्लीमेंट्स", "https://youtu.be/xyz456", "https://www.onlymyhealth.com/hindi/common-cold-treatment-123"],"telugu": ["పారాసిటమోల్", "క్లోర్ఫెనిరామిన్", "ఫెనైలెఫ్రిన్", "డెక్స్ట్రోమెథోర్ఫాన్", "జింక్ సప్లిమెంట్స్", "https://youtu.be/def789", "https://telugu.samayam.com/health/common-cold-treatment-123"]}, "severity": { "english": "Mild", "hindi": "हल्का", "telugu": "తేలికపాటి" }},"General Illness": {"remedies": {"english": ["Monitor symptoms", "Rest", "Hydration", "Nutritious food", "Good hygiene"],"hindi": ["लक्षणों की निगरानी करें", "आराम", "हाइड्रेशन", "पौष्टिक भोजन", "अच्छी स्वच्छता"],"telugu": ["లక్షణాలను పర్యవేక్షించండి", "విశ్రాంతి", "హైడ్రేషన్", "పోషకాహారం", "మంచి పరిశుభ్రత"]},"medicines": {"english": ["Consult doctor", "Paracetamol (if fever/pain)", "Antihistamines (if allergy)", "ORS (if dehydration)", "https://www.who.int/health-topics", "https://www.youtube.com/results?search_query=best%20videos%20for%20common%20cold&sp=EgIQAQ%253D%253D"],"hindi": ["डॉक्टर से सलाह लें", "पैरासिटामोल (यदि बुखार/दर्द)", "एंटीहिस्टामाइन (यदि एलर्जी)", "ओआरएस (यदि निर्जलीकरण)", "https://www.google.com/search?q=https://www.nhp.gov.in/health-topics", "https://m.youtube.com/watch?v=3HegYcUJohs&pp=ygUOI2ludGVncmF0ZWR5b2c%3D"],"telugu": ["వైద్యుడిని సంప్రదించండి", "పారాసిటమోల్ (జ్వరం/నొప్పి ఉంటే)", "యాంటీహిస్టమైన్‌లు (అలెర్జీ ఉంటే)", "ORS (డీహైడ్రేషన్ ఉంటే)", "https://www.google.com/search?q=https://arogyakeralam.gov.in/index.php/information/health-education/", "https://m.youtube.com/watch?v=HV9yz2izQWU"]}, "severity": { "english": "Mild to Moderate", "hindi": "हल्का से मध्यम", "telugu": "తేలికపాటి నుండి మధ్యస్థం" }},"Migraine": {"remedies": { "english": ["Rest in dark room", "Cold compress", "Hydration", "Avoid triggers"], "hindi": ["अंधेरे कमरे में आराम", "ठंडा सेक", "हाइड्रेशन", "ट्रिगर से बचें"], "telugu": ["చీకటి గదిలో విశ్రాంతి", "చల్లని కంప్రెస్", "హైడ్రేషన్", "ట్రిగ్గర్‌లను నివారించండి"] },"medicines": { "english": ["Sumatriptan (Rx)", "Ibuprofen", "Anti-nausea meds", "https://www.mayoclinic.org/diseases-conditions/migraine-headache/diagnosis-treatment/drc-20360207"], "hindi": ["सुमाट्रिप्टान (Rx)", "इबुप्रोफेन", "मतली-रोधी दवा", "https://www.onlymyhealth.com/hindi/migraine-treatment-123"], "telugu": ["సుమాట్రిప్టాన్ (Rx)", "ఇబుప్రోఫెన్", "వికారం నిరోధక మందు", "https://telugu.samayam.com/health/migraine-treatment-123"] },"severity": { "english": "Moderate to Severe", "hindi": "मध्यम से गंभीर", "telugu": "మధ్యస్థం నుండి తీవ్రమైన" }},"Heart Condition": {"remedies": { "english": ["Follow doctor's advice", "Healthy diet", "Gentle exercise", "Stress management"], "hindi": ["डॉक्टर की सलाह मानें", "स्वस्थ आहार", "हल्का व्यायाम", "तनाव प्रबंधन"], "telugu": ["వైద్యుని సలహా పాటించండి", "ఆరోగ్యకరమైన ఆహారం", "సున్నితమైన వ్యాయామం", "ఒత్తిడి నిర్వహణ"] },"medicines": { "english": ["Varies (Aspirin, Statins, etc. Rx)", "Consult cardiologist", "https://www.cdc.gov/heartdisease/prevention.htm", "https://www.google.com/search?q=https://www.youtube.com/watch%3Fv%3D4Z4S-L3Y5jY7"], "hindi": ["भिन्न (एस्पिरिन, स्टैटिन, आदि Rx)", "कार्डियोलॉजिस्ट से सलाह लें", "https://www.google.com/search?q=https://www.apollohospitals.com/hi/diseases-and-conditions/heart-disease/", "https://www.google.com/search?q=https://www.youtube.com/watch%3Fv%3D4Z4S-L3Y5jY7"], "telugu": ["మారుతూ ఉంటుంది (ఆస్పిరిన్, స్టాటిన్స్, మొదలైనవి Rx)", "కార్డియాలజిస్ట్‌ను సంప్రదించండి", "https://telugu.oneindia.com/health/heart-disease-prevention-123", "https://www.google.com/search?q=https://www.youtube.com/watch%3Fv%3D4Z4S-L3Y5jY7"] },"severity": { "english": "Varies (Often Serious)", "hindi": "भिन्न (अक्सर गंभीर)", "telugu": "మారుతూ ఉంటుంది (తరచుగా తీవ్రమైనది)" }},"Motion Sickness": {"remedies": { "english": ["Look at horizon", "Fresh air", "Avoid heavy meals", "Acupressure bands"], "hindi": ["क्षितिज देखें", "ताजी हवा", "भारी भोजन से बचें", "एक्यूप्रेशर बैंड"], "telugu": ["హోరిజోన్ చూడండి", "తాజా గాలి", "భారీ భోజనం మానుకోండి", "ఆక్యుప్రెషర్ బ్యాండ్లు"] },"medicines": { "english": ["Dimenhydrinate", "Meclizine", "Scopolamine patch (Rx)", "https://www.google.com/search?q=https://www.nidcd.nih.gov/health/motion-sickness", "http://www.youtube.com/watch?v=gKhE3CMz7Sk"], "hindi": ["डाइमेनहाइड्रिनेट", "मेक्लिज़िन", "स्कोपोलामाइन पैच (Rx)", "https://www.google.com/search?q=https://www.askapollo.com/hi/diseases-conditions/motion-sickness", "https://www.google.com/search?q=https://www.youtube.com/watch%3Fv%3Drbo94OIFNeM2"], "telugu": ["డైమెన్‌హైడ్రినేట్", "మెక్లిజైన్", "స్కోపోలమైన్ ప్యాచ్ (Rx)", "https://www.google.com/search?q=https://www.practo.com/healthfeed/prayana-anarogyam-motion-sickness-nivarana-mariyu-chikitsa-in-telugu-43756", "https://www.google.com/search?q=https://www.youtube.com/watch%3Fv%3Drbo94OIFNeM1"] },"severity": { "english": "Mild to Moderate", "hindi": "हल्का से मध्यम", "telugu": "తేలికపాటి నుండి మధ్యస్థం" }},"Inflammation": {"remedies": { "english": ["Anti-inflammatory diet", "Cold/hot compress", "Rest", "Treat cause"], "hindi": ["एंटी-इंफ्लेमेटरी आहार", "ठंडा/गर्म सेक", "आराम", "कारण का इलाज"], "telugu": ["యాంటీ ఇన్ఫ్లమేటరీ డైట్", "చల్లని/వేడి కంప్రెస్", "విశ్రాంతి", "కారణానికి చికిత్స"] },"medicines": { "english": ["NSAIDs (Ibuprofen)", "Consult doctor", "https://www.google.com/search?q=https://www.niams.nih.gov/health-topics/inflammation", "http://www.youtube.com/watch?v=fwv4lp8vxEY"], "hindi": ["NSAIDs (इबुप्रोफेन)", "डॉक्टर से सलाह लें", "https://www.google.com/search?q=https://www.askapollo.com/hi/diseases-conditions/inflammation", "https://www.google.com/search?q=https://www.youtube.com/watch%3Fv%3Drbo94OIFNeM5"], "telugu": ["NSAIDs (ఇబుప్రోఫెన్)", "వైద్యుడిని సంప్రదించండి", "https://www.google.com/search?q=https://www.practo.com/healthfeed/vapu-inflammation-karanalu-lakshanalu-mariyu-chikitsa-in-telugu-43788", "https://www.google.com/search?q=https://www.youtube.com/watch%3Fv%3Drbo94OIFNeM4"] },"severity": { "english": "Varies", "hindi": "भिन्न", "telugu": "మారుతూ ఉంటుంది" }},"Conjunctivitis": {"remedies": { "english": ["Warm compress", "Avoid touching eyes", "Wash hands", "Discard tissues"], "hindi": ["गर्म सेक", "आंखों को न छुएं", "हाथ धोएं", "टिशू फेंकें"], "telugu": ["వెచ్చని కంప్రెస్", "కళ్లను తాకవద్దు", "చేతులు కడుక్కోండి", "టిష్యూలను పారవేయండి"] },"medicines": { "english": ["Antibiotic/Antihistamine drops", "Artificial tears", "https://www.cdc.gov/conjunctivitis/index.html", "http://www.youtube.com/watch?v=qEg7sJKRhXI"], "hindi": ["एंटीबायोटिक/एंटीहिस्टामाइन ड्रॉप्स", "आर्टिफिशियल टियर्स", "https://www.google.com/search?q=https://www.askapollo.com/hi/diseases-conditions/conjunctivitis", "https://www.google.com/search?q=https://www.youtube.com/watch%3Fv%3Drbo94OIFNeM8"], "telugu": ["యాంటీబయాటిక్/యాంటీహిస్టమైన్ డ్రాప్స్", "ఆర్టిఫిషియల్ టియర్స్", "https://www.google.com/search?q=https://www.practo.com/healthfeed/kandlakalaka-conjunctivitis-karanalu-lakshanalu-mariyu-chikitsa-in-telugu-43642", "https://www.google.com/search?q=https://www.youtube.com/watch%3Fv%3Drbo94OIFNeM7"] },"severity": { "english": "Mild to Moderate", "hindi": "हल्का से मध्यम", "telugu": "తేలికపాటి నుండి మధ్యస్థం" }},"Ear Infection": {"remedies": { "english": ["Warm compress", "Keep ear dry", "Rest"], "hindi": ["गर्म सेक", "कान सूखा रखें", "आराम"], "telugu": ["వెచ్చని కంప్రెస్", "చెవిని పొడిగా ఉంచండి", "విశ్రాంతి"] },"medicines": { "english": ["Pain relievers", "Antibiotic drops (Rx)", "https://www.nidcd.nih.gov/health/ear-infections-children", "http://www.youtube.com/watch?v=XtgimNDHz7s"], "hindi": ["दर्द निवारक", "एंटीबायोटिक ड्रॉप्स (Rx)", "https://www.google.com/search?q=https://www.askapollo.com/hi/diseases-conditions/ear-infection", "http://www.youtube.com/watch?v=XtgimNDHz7s"], "telugu": ["నొప్పి నివారణలు", "యాంటీబయాటిక్ డ్రాప్స్ (Rx)", "https://www.google.com/search?q=https://www.practo.com/healthfeed/chevi-infection-karanalu-lakshanalu-mariyu-chikitsa-in-telugu-43638", "https://www.google.com/search?q=https://www.youtube.com/watch%3Fv%3DbP4vj-PWG0o0"] },"severity": { "english": "Mild to Moderate", "hindi": "हल्का से मध्यम", "telugu": "తేలికపాటి నుండి మధ్యస్థం" }},"Dehydration": {"remedies": { "english": ["Drink water", "ORS", "Avoid caffeine/alcohol", "Water-rich foods"], "hindi": ["पानी पिएं", "ओआरएस", "कैफीन/शराब से बचें", "पानी युक्त भोजन"], "telugu": ["నీరు త్రాగండి", "ORS", "కెఫిన్/ఆల్కహాల్ మానుకోండి", "నీరు అధికంగా ఉండే ఆహారాలు"] },"medicines": { "english": ["Fluids", "IV fluids (severe)", "Treat cause", "https://www.google.com/search?q=https://www.mayoclinic.org/diseases-conditions/dehydration/diagnosis-treatment/drc-20355589", "http://www.youtube.com/watch?v=4Rcb0ZTGPek"], "hindi": ["तरल पदार्थ", "IV तरल पदार्थ (गंभीर)", "कारण का इलाज", "https://www.google.com/search?q=https://www.askapollo.com/hi/diseases-conditions/dehydration", "http://www.youtube.com/watch?v=4Rcb0ZTGPek"], "telugu": ["ద్రవాలు", "IV ద్రవాలు (తీవ్రమైన)", "కారణానికి చికిత్స", "https://www.google.com/search?q=https://www.practo.com/healthfeed/dehydration-sareeramlo-neeti-koratha-karanalu-lakshanalu-mariyu-chikitsa-in-telugu-43644", "http://www.youtube.com/watch?v=S2_jtNJUKe0"] },"severity": { "english": "Mild to Severe", "hindi": "हल्का से गंभीर", "telugu": "తేలికపాటి నుండి తీవ్రమైన" }}
+         };
+
+        // --- DOM Elements ---
+        // DOM elements remain the same...
+         const elements = {
+             appTitle: document.getElementById('app-title'),collegeHeading: document.getElementById('college-heading'),patientInfoTitle: document.getElementById('patient-info-title'),diagnosisReportTitle: document.getElementById('diagnosis-report-title'),searchPatientTitle: document.getElementById('search-patient-title'),patientDetailsTitle: document.getElementById('patient-details-title'),symptomsTitle: document.getElementById('symptoms-title'),predictedConditionLabel: document.getElementById('predicted-condition-label'),severityLabel: document.getElementById('severity-label'),remediesTitle: document.getElementById('remedies-title'),medicinesTitle: document.getElementById('medicines-title'),languageLabel: document.getElementById('language-label'),patientIdLabel: document.getElementById('patient-id-label'),patientNameLabel: document.getElementById('patient-name-label'),ageLabel: document.getElementById('age-label'),sexLabel: document.getElementById('sex-label'),phoneLabel: document.getElementById('phone-label'),patientIdEntry: document.getElementById('patient-id-entry'),patientNameEntry: document.getElementById('patient-name-entry'),patientAgeEntry: document.getElementById('patient-age-entry'),patientSexCombo: document.getElementById('patient-sex-combo'),patientPhoneEntry: document.getElementById('patient-phone-entry'),symptomsGrid: document.getElementById('symptoms-grid'),languageRadios: document.querySelectorAll('input[name="language"]'),searchBtn: document.getElementById('search-btn'),diagnoseBtn: document.getElementById('diagnose-btn'),clearBtn: document.getElementById('clear-btn'),saveBtn: document.getElementById('save-btn'),searchStatus: document.getElementById('search-status'),predictedCondition: document.getElementById('predicted-condition'),severity: document.getElementById('severity'),remediesText: document.getElementById('remedies-text'),medicinesText: document.getElementById('medicines-text'), loadingOverlay: document.getElementById('loading-overlay') // Added Loading Overlay Element
+         };
+
+        let currentLanguage = 'english';
+        let currentDiagnosisResult = null;
+        let currentPatientId = null;
+
+        // --- Functions ---
+        // Functions remain mostly the same...
+         /** Gets the translation for a given key and language */
+         function getTranslation(key, lang) { return translations[key]?.[lang] || key; }
+         /** Gets the symptom name in the current language */
+         function getSymptomName(symptomKey, lang) { return symptomTranslations[symptomKey]?.[lang] || symptomKey; }
+         /** Populates the symptoms grid with checkboxes */
+         function populateSymptoms() {
+             elements.symptomsGrid.innerHTML = ''; // Clear existing
+             const checkedSymptoms = Array.from(elements.symptomsGrid.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value); // Preserve checked state
+             symptoms.forEach(symptomKey => {
+                 const symptomName = getSymptomName(symptomKey, currentLanguage);
+                 const div = document.createElement('div'); div.className = 'flex items-center';
+                 const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.id = `symptom-${symptomKey}`; checkbox.value = symptomKey; checkbox.className = 'mr-2 h-4 w-4 rounded border-gray-400 text-[#0288d1] focus:ring-[#0288d1] accent-[#01579b]';
+                 if (checkedSymptoms.includes(symptomKey)) { checkbox.checked = true; } // Restore checked state
+                 const label = document.createElement('label'); label.htmlFor = `symptom-${symptomKey}`; label.textContent = symptomName; label.className = 'text-sm text-gray-700 select-none';
+                 div.appendChild(checkbox); div.appendChild(label); elements.symptomsGrid.appendChild(div);
+             });
+         }
+         /** Updates all UI text based on the current language */
+         function updateUIText() {
+             elements.appTitle.textContent = getTranslation('title', currentLanguage);
+             elements.patientInfoTitle.textContent = getTranslation('patient_info_title', currentLanguage); elements.diagnosisReportTitle.textContent = getTranslation('diagnosis_report_title', currentLanguage); elements.searchPatientTitle.textContent = getTranslation('search_patient_title', currentLanguage); elements.patientDetailsTitle.textContent = getTranslation('patient_details_title', currentLanguage); elements.symptomsTitle.textContent = getTranslation('symptoms_title', currentLanguage); elements.predictedConditionLabel.textContent = getTranslation('predicted_condition_label', currentLanguage); elements.severityLabel.textContent = getTranslation('severity_label', currentLanguage); elements.remediesTitle.textContent = getTranslation('remedies_title', currentLanguage); elements.medicinesTitle.textContent = getTranslation('medicines_title', currentLanguage); elements.languageLabel.textContent = getTranslation('language_label', currentLanguage); elements.patientIdLabel.textContent = getTranslation('patient_id_label', currentLanguage); elements.patientNameLabel.textContent = getTranslation('patient_name_label', currentLanguage); elements.ageLabel.textContent = getTranslation('age_label', currentLanguage); elements.sexLabel.textContent = getTranslation('sex_label', currentLanguage); elements.phoneLabel.textContent = getTranslation('phone_label', currentLanguage); elements.searchBtn.textContent = getTranslation('search_button', currentLanguage); elements.diagnoseBtn.textContent = getTranslation('diagnose', currentLanguage); elements.clearBtn.textContent = getTranslation('clear_button', currentLanguage); elements.saveBtn.textContent = getTranslation('save_records', currentLanguage);
+             populateSymptoms(); // Re-populate symptoms
+              if (currentDiagnosisResult) { displayDiagnosis(currentDiagnosisResult); } else { clearReport(); }
+         }
+         /** Handles language change */
+         function handleLanguageChange(event) { currentLanguage = event.target.value; updateUIText(); }
+         /** Predicts disease based on selected symptoms */
+         function predictDisease() {
+             const selectedSymptomKeys = []; elements.symptomsGrid.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => { selectedSymptomKeys.push(cb.value); });
+             if (selectedSymptomKeys.length === 0) { alert(`${getTranslation('input_error', currentLanguage)}: ${getTranslation('select_symptom', currentLanguage)}`); return null; }
+             const symptomVector = symptoms.map(key => selectedSymptomKeys.includes(key) ? 1 : 0); const diseaseScores = Array(diseases.length).fill(0);
+             symptomVector.forEach((present, symptomIdx) => {
+                 if (present) {
+                     const symptomKey = symptoms[symptomIdx]; if (symptomDiseaseMap[symptomKey]) { diseases.forEach((disease, diseaseIdx) => { if (symptomDiseaseMap[symptomKey][diseaseIdx] === 1) { diseaseScores[diseaseIdx]++; } }); }
+                 }
+             });
+             const maxScore = Math.max(...diseaseScores); if (maxScore === 0) { return "General Illness"; }
+             const bestMatchIndex = diseaseScores.indexOf(maxScore); return diseases[bestMatchIndex];
+         }
+          /** Displays the diagnosis report */
+          function displayDiagnosis(diseaseName) {
+              currentDiagnosisResult = diseaseName; // Store the result
+              const treatment = treatmentDb[diseaseName] || treatmentDb["General Illness"]; const lang = currentLanguage;
+              elements.predictedCondition.textContent = diseaseName; elements.severity.textContent = treatment.severity?.[lang] || '-';
+              const remediesList = treatment.remedies?.[lang] || [getTranslation('no_info', lang) || "No info"]; elements.remediesText.innerHTML = remediesList.map(item => `<p class="py-0.5">• ${item}</p>`).join('');
+              const medicinesList = treatment.medicines?.[lang] || [getTranslation('no_info', lang) || "No info"];
+              elements.medicinesText.innerHTML = medicinesList.map(item => {
+                  if (item.startsWith('http') || item.startsWith('www')) { return `<p class="py-0.5">• <a href="${item}" target="_blank" class="report-link">${item}</a></p>`; } else { return `<p class="py-0.5">• ${item}</p>`; }
+              }).join('');
+          }
+         /** Clears the diagnosis report section */
+         function clearReport() {
+              currentDiagnosisResult = null; elements.predictedCondition.textContent = '-'; elements.severity.textContent = '-'; elements.remediesText.innerHTML = '<p>-</p>'; elements.medicinesText.innerHTML = '<p>-</p>';
+         }
+         /** Clears all input fields and the report */
+         function clearForm(keepSearchId = false) {
+             if (!keepSearchId) { elements.patientIdEntry.value = ''; currentPatientId = null; elements.searchStatus.textContent = ''; }
+             elements.patientNameEntry.value = ''; elements.patientAgeEntry.value = ''; elements.patientSexCombo.value = ''; elements.patientPhoneEntry.value = '';
+             elements.symptomsGrid.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = false; });
+             clearReport();
+         }
+         /** Handles the Diagnose button click */
+         function handleDiagnose() {
+              if (!elements.patientNameEntry.value) { alert(`${getTranslation('input_error', currentLanguage)}: ${getTranslation('enter_patient_name', currentLanguage)}`); return; }
+              const predicted = predictDisease(); if (predicted) { displayDiagnosis(predicted); }
+         }
+         /** Handles the Search button click (Placeholder) */
+         function handleSearch() {
+             const id = elements.patientIdEntry.value; const lang = currentLanguage; elements.searchStatus.textContent = '';
+             if (!id || !/^\d+$/.test(id)) { elements.searchStatus.textContent = getTranslation('enter_patient_id', lang); elements.searchStatus.className = 'text-sm text-red-500 ml-2 font-medium'; return; }
+             console.log(`Simulating search for Patient ID: ${id}`);
+             if (id === '123') {
+                 clearForm(); elements.patientIdEntry.value = '123'; elements.patientNameEntry.value = 'Simulated Patient'; elements.patientAgeEntry.value = '45'; elements.patientSexCombo.value = 'Female'; elements.patientPhoneEntry.value = '555-1234'; currentPatientId = 123;
+                 elements.searchStatus.textContent = getTranslation('patient_loaded', lang); elements.searchStatus.className = 'text-sm text-green-700 ml-2 font-medium';
+             } else {
+                 clearForm(true); elements.searchStatus.textContent = getTranslation('patient_not_found', lang); elements.searchStatus.className = 'text-sm text-orange-600 ml-2 font-medium';
+             }
+         }
+          /** Handles the Save button click (Now Simulates Saving) */
+          function handleSave() {
+               if (!currentDiagnosisResult) { alert(getTranslation('no_diagnosis_to_save', currentLanguage)); return; }
+
+               // --- Simulation of Saving ---
+               const patientData = {
+                   id: currentPatientId || elements.patientIdEntry.value || 'N/A', // Use entered ID if no search ID
+                   name: elements.patientNameEntry.value,
+                   age: elements.patientAgeEntry.value,
+                   sex: elements.patientSexCombo.value,
+                   phone: elements.patientPhoneEntry.value,
+                   diagnosis: currentDiagnosisResult,
+                   severity: elements.severity.textContent,
+                   remedies: elements.remediesText.innerText, // Get text content
+                   medicines: elements.medicinesText.innerText // Get text content
+               };
+
+               console.log("Simulating Save:", patientData);
+
+               // Show a confirmation message
+               alert(`${getTranslation('save_success_title', currentLanguage)}: ${getTranslation('save_success_message', currentLanguage)}`);
+               // In a real application, you would send 'patientData' to a backend server here.
+          }
+
+        // --- Event Listeners ---
+        elements.languageRadios.forEach(radio => { radio.addEventListener('change', handleLanguageChange); });
+        elements.diagnoseBtn.addEventListener('click', handleDiagnose);
+        elements.clearBtn.addEventListener('click', () => clearForm(false));
+        elements.searchBtn.addEventListener('click', handleSearch);
+        elements.saveBtn.addEventListener('click', handleSave); // Save button now calls the updated handleSave
+
+        // --- Initial Setup ---
+        populateSymptoms();
+        updateUIText();
+
+        // --- Loading Screen Logic ---
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                elements.loadingOverlay.classList.add('hidden');
+            }, 2500); // 2.5 seconds delay
+        });
+
+    </script>
+
+</body>
+</html>
+
+
